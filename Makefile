@@ -14,7 +14,7 @@ release:
 	$(MAKE) build
 	$(MAKE) build-windows
 	git add wails.json
-	git commit -m "(chore): bump version to $(VERSION)"
+	git diff --cached --quiet wails.json || git commit -m "(chore): bump version to $(VERSION)"
 	git tag $(VERSION)
 	git push origin main $(VERSION)
 	gh release create $(VERSION) build/bin/illusive build/bin/illusive.exe illusive.db --title "$(VERSION)" --notes ""

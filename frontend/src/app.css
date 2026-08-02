@@ -52,7 +52,7 @@ button.danger:hover {
 
 table {
     width: 100%;
-    table-layout: fixed;
+    table-layout: auto;
     border-collapse: collapse;
     text-align: left;
 }
@@ -85,7 +85,6 @@ th[data-key="adjective"] {
 
 th[data-key="derivedAdverb"] {
     width: 6%;
-    min-width: 105px;
     white-space: nowrap;
 }
 
@@ -133,6 +132,7 @@ th.sortable:hover {
 }
 
 td.actions {
+    white-space: nowrap;
     text-align: right;
 }
 

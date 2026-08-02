@@ -1,19 +1,71 @@
-# README
+# Illusive Adjectives
 
-## About
+A desktop CRUD application for maintaining a dictionary of English adjectives
+(word, adjective, derived adverb, translations, and examples — literal and
+figurative). Built with [Wails](https://wails.io) (Go backend, vanilla
+HTML/JS/CSS frontend) and [SQLite](https://www.sqlite.org/) storage.
 
-This is the official Wails Vanilla template.
+## Data
 
-You can configure the project by editing `wails.json`. More information about the project settings can be found
-here: https://wails.io/docs/reference/project-config
+- `dainty_woordenlijst.ods` and `projectillusiveadjectives.doc` are the
+  original source files the schema and initial data were derived from.
+- `illusive.db` is the seeded SQLite database, generated from those sources
+  by `cmd/migrate`. It ships alongside the executables so the app has data
+  to open on first run, and can be edited directly by the user afterwards
+  with any SQLite tool.
 
-## Live Development
+### Schema
 
-To run in live development mode, run `wails dev` in the project directory. This will run a Vite development
-server that will provide very fast hot reload of your frontend changes. If you want to develop in a browser
-and have access to your Go methods, there is also a dev server that runs on http://localhost:34115. Connect
-to this in your browser, and you can call your Go code from devtools.
+Table `adjectives`:
+
+| Column                   | Description                        |
+|--------------------------|-------------------------------------|
+| `word`                   | Root word / noun                    |
+| `adjective`               | The adjective itself                |
+| `derived_adverb`          | Adverb derived from the adjective   |
+| `translation_literal`     | Dutch translation, literal sense    |
+| `translation_figurative`  | Dutch translation, figurative sense |
+| `example_literal`         | Example sentence, literal sense     |
+| `example_figurative`      | Example sentence, figurative sense  |
+
+### Re-running the migration
+
+```sh
+go run ./cmd/migrate illusive.db
+```
+
+This refuses to overwrite an existing database file, so remove or rename
+`illusive.db` first if you want to regenerate it from scratch.
+
+## Development
+
+Requires Go, Node/npm, and the [Wails CLI](https://wails.io/docs/gettingstarted/installation).
+On Linux, GTK3 and WebKit2GTK development packages must be installed.
+
+```sh
+make run    # live development with hot reload
+make test   # go test ./...
+```
 
 ## Building
 
-To build a redistributable, production mode package, use `wails build`.
+```sh
+make build           # Linux executable -> build/bin/illusive
+make build-windows   # Windows executable -> build/bin/illusive.exe
+```
+
+Both are self-contained, single-file executables — no CGO cross-compilation
+toolchain is required, since the app uses a pure-Go SQLite driver
+(`modernc.org/sqlite`) and Wails' syscall-based Windows backend. Place
+`illusive.db` next to the executable; the app opens (or creates) an
+`illusive.db` file in its own directory at startup.
+
+## Releasing
+
+```sh
+make release VERSION=v0.1.0
+```
+
+This bumps `productVersion` in `wails.json`, builds both platform
+executables, tags and pushes the commit, and publishes the Linux binary,
+Windows binary, and `illusive.db` as assets on a new GitHub release.

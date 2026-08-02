@@ -72,7 +72,7 @@ th {
 }
 
 tr:hover td {
-    background: #f2f3f5;
+    background: #dde1e7;
 }
 
 th[data-key="root"] {

@@ -85,6 +85,8 @@ th[data-key="adjective"] {
 
 th[data-key="derivedAdverb"] {
     width: 6%;
+    min-width: 105px;
+    white-space: nowrap;
 }
 
 th[data-key="translationLiteral"],

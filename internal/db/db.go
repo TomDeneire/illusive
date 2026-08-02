@@ -13,7 +13,7 @@ import (
 const schema = `
 CREATE TABLE IF NOT EXISTS adjectives (
 	id                     INTEGER PRIMARY KEY AUTOINCREMENT,
-	word                   TEXT NOT NULL DEFAULT '',
+	root                   TEXT NOT NULL DEFAULT '',
 	adjective              TEXT NOT NULL DEFAULT '',
 	derived_adverb         TEXT NOT NULL DEFAULT '',
 	translation_literal    TEXT NOT NULL DEFAULT '',
@@ -49,7 +49,7 @@ func (d *DB) Close() error {
 
 // List returns all adjectives ordered alphabetically.
 func (d *DB) List() ([]model.Adjective, error) {
-	rows, err := d.conn.Query(`SELECT id, word, adjective, derived_adverb, translation_literal, translation_figurative, example_literal, example_figurative FROM adjectives ORDER BY adjective`)
+	rows, err := d.conn.Query(`SELECT id, root, adjective, derived_adverb, translation_literal, translation_figurative, example_literal, example_figurative FROM adjectives ORDER BY adjective`)
 	if err != nil {
 		return nil, fmt.Errorf("list adjectives: %w", err)
 	}
@@ -57,13 +57,13 @@ func (d *DB) List() ([]model.Adjective, error) {
 	return scanAll(rows)
 }
 
-// Search returns adjectives whose word, adjective, or translations match the query.
+// Search returns adjectives whose root, adjective, or translations match the query.
 func (d *DB) Search(query string) ([]model.Adjective, error) {
 	like := "%" + query + "%"
 	rows, err := d.conn.Query(`
-		SELECT id, word, adjective, derived_adverb, translation_literal, translation_figurative, example_literal, example_figurative
+		SELECT id, root, adjective, derived_adverb, translation_literal, translation_figurative, example_literal, example_figurative
 		FROM adjectives
-		WHERE word LIKE ? OR adjective LIKE ? OR translation_literal LIKE ? OR translation_figurative LIKE ?
+		WHERE root LIKE ? OR adjective LIKE ? OR translation_literal LIKE ? OR translation_figurative LIKE ?
 		ORDER BY adjective`, like, like, like, like)
 	if err != nil {
 		return nil, fmt.Errorf("search adjectives: %w", err)
@@ -74,9 +74,9 @@ func (d *DB) Search(query string) ([]model.Adjective, error) {
 
 // Get returns a single adjective by id.
 func (d *DB) Get(id int64) (model.Adjective, error) {
-	row := d.conn.QueryRow(`SELECT id, word, adjective, derived_adverb, translation_literal, translation_figurative, example_literal, example_figurative FROM adjectives WHERE id = ?`, id)
+	row := d.conn.QueryRow(`SELECT id, root, adjective, derived_adverb, translation_literal, translation_figurative, example_literal, example_figurative FROM adjectives WHERE id = ?`, id)
 	var a model.Adjective
-	err := row.Scan(&a.ID, &a.Word, &a.Adjective, &a.DerivedAdverb, &a.TranslationLiteral, &a.TranslationFigurative, &a.ExampleLiteral, &a.ExampleFigurative)
+	err := row.Scan(&a.ID, &a.Root, &a.Adjective, &a.DerivedAdverb, &a.TranslationLiteral, &a.TranslationFigurative, &a.ExampleLiteral, &a.ExampleFigurative)
 	if err != nil {
 		return model.Adjective{}, fmt.Errorf("get adjective %d: %w", id, err)
 	}
@@ -86,9 +86,9 @@ func (d *DB) Get(id int64) (model.Adjective, error) {
 // Create inserts a new adjective and returns it with its assigned id.
 func (d *DB) Create(a model.Adjective) (model.Adjective, error) {
 	res, err := d.conn.Exec(`
-		INSERT INTO adjectives (word, adjective, derived_adverb, translation_literal, translation_figurative, example_literal, example_figurative)
+		INSERT INTO adjectives (root, adjective, derived_adverb, translation_literal, translation_figurative, example_literal, example_figurative)
 		VALUES (?, ?, ?, ?, ?, ?, ?)`,
-		a.Word, a.Adjective, a.DerivedAdverb, a.TranslationLiteral, a.TranslationFigurative, a.ExampleLiteral, a.ExampleFigurative)
+		a.Root, a.Adjective, a.DerivedAdverb, a.TranslationLiteral, a.TranslationFigurative, a.ExampleLiteral, a.ExampleFigurative)
 	if err != nil {
 		return model.Adjective{}, fmt.Errorf("create adjective: %w", err)
 	}
@@ -104,9 +104,9 @@ func (d *DB) Create(a model.Adjective) (model.Adjective, error) {
 func (d *DB) Update(a model.Adjective) error {
 	res, err := d.conn.Exec(`
 		UPDATE adjectives
-		SET word = ?, adjective = ?, derived_adverb = ?, translation_literal = ?, translation_figurative = ?, example_literal = ?, example_figurative = ?
+		SET root = ?, adjective = ?, derived_adverb = ?, translation_literal = ?, translation_figurative = ?, example_literal = ?, example_figurative = ?
 		WHERE id = ?`,
-		a.Word, a.Adjective, a.DerivedAdverb, a.TranslationLiteral, a.TranslationFigurative, a.ExampleLiteral, a.ExampleFigurative, a.ID)
+		a.Root, a.Adjective, a.DerivedAdverb, a.TranslationLiteral, a.TranslationFigurative, a.ExampleLiteral, a.ExampleFigurative, a.ID)
 	if err != nil {
 		return fmt.Errorf("update adjective %d: %w", a.ID, err)
 	}
@@ -140,7 +140,7 @@ func scanAll(rows *sql.Rows) ([]model.Adjective, error) {
 	list := []model.Adjective{}
 	for rows.Next() {
 		var a model.Adjective
-		if err := rows.Scan(&a.ID, &a.Word, &a.Adjective, &a.DerivedAdverb, &a.TranslationLiteral, &a.TranslationFigurative, &a.ExampleLiteral, &a.ExampleFigurative); err != nil {
+		if err := rows.Scan(&a.ID, &a.Root, &a.Adjective, &a.DerivedAdverb, &a.TranslationLiteral, &a.TranslationFigurative, &a.ExampleLiteral, &a.ExampleFigurative); err != nil {
 			return nil, fmt.Errorf("scan adjective: %w", err)
 		}
 		list = append(list, a)

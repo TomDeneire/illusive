@@ -9,7 +9,7 @@ import {
 } from '../wailsjs/go/main/App';
 
 const FIELDS = [
-    { key: 'word', label: 'Word' },
+    { key: 'root', label: 'Root' },
     { key: 'adjective', label: 'Adjective' },
     { key: 'derivedAdverb', label: 'Derived adverb' },
     { key: 'translationLiteral', label: 'Translation (literally)' },

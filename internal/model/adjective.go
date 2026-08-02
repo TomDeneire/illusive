@@ -3,7 +3,7 @@ package model
 // Adjective represents a single entry in the adjectives dictionary.
 type Adjective struct {
 	ID                   int64  `json:"id"`
-	Word                 string `json:"word"`
+	Root                 string `json:"root"`
 	Adjective            string `json:"adjective"`
 	DerivedAdverb        string `json:"derivedAdverb"`
 	TranslationLiteral   string `json:"translationLiteral"`

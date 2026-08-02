@@ -2,7 +2,7 @@ export namespace model {
 	
 	export class Adjective {
 	    id: number;
-	    word: string;
+	    root: string;
 	    adjective: string;
 	    derivedAdverb: string;
 	    translationLiteral: string;
@@ -17,7 +17,7 @@ export namespace model {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.id = source["id"];
-	        this.word = source["word"];
+	        this.root = source["root"];
 	        this.adjective = source["adjective"];
 	        this.derivedAdverb = source["derivedAdverb"];
 	        this.translationLiteral = source["translationLiteral"];

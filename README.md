@@ -1,7 +1,7 @@
 # Illusive Adjectives
 
 A desktop CRUD application for maintaining a dictionary of English adjectives
-(word, adjective, derived adverb, translations, and examples — literal and
+(root, adjective, derived adverb, translations, and examples — literal and
 figurative). Built with [Wails](https://wails.io) (Go backend, vanilla
 HTML/JS/CSS frontend) and [SQLite](https://www.sqlite.org/) storage.
 
@@ -20,7 +20,7 @@ Table `adjectives`:
 
 | Column                   | Description                        |
 |--------------------------|-------------------------------------|
-| `word`                   | Root word / noun                    |
+| `root`                    | Root word / noun                    |
 | `adjective`               | The adjective itself                |
 | `derived_adverb`          | Adverb derived from the adjective   |
 | `translation_literal`     | Dutch translation, literal sense    |

@@ -3,7 +3,6 @@ import './app.css';
 
 import {
     ListAdjectives,
-    SearchAdjectives,
     CreateAdjective,
     UpdateAdjective,
     DeleteAdjective,
@@ -19,22 +18,37 @@ const FIELDS = [
     { key: 'exampleFigurative', label: 'Example (figuratively)' },
 ];
 
+// Columns shown (and filterable/sortable) in the table.
+const COLUMNS = FIELDS.slice(0, 5);
+
 let editingId = null;
+let allEntries = [];
+const filters = Object.fromEntries(COLUMNS.map(c => [c.key, '']));
+let sortKey = 'adjective';
+let sortDir = 'asc';
 
 document.querySelector('#app').innerHTML = `
     <h1>Illusive Adjectives</h1>
     <div class="toolbar">
-        <input id="search" type="text" placeholder="Search adjectives, translations..." autocomplete="off" />
         <button id="add-btn">+ Add adjective</button>
     </div>
     <table>
         <thead>
             <tr>
-                <th>Word</th>
-                <th>Adjective</th>
-                <th>Derived adverb</th>
-                <th>Translation (literally)</th>
-                <th>Translation (figuratively)</th>
+                ${COLUMNS.map(c => `
+                    <th class="sortable" data-key="${c.key}">
+                        <span class="th-label">${c.label}</span>
+                        <span class="sort-indicator" id="sort-${c.key}"></span>
+                    </th>
+                `).join('')}
+                <th></th>
+            </tr>
+            <tr class="filter-row">
+                ${COLUMNS.map(c => `
+                    <th>
+                        <input type="text" class="filter-input" data-key="${c.key}" placeholder="Filter..." autocomplete="off" />
+                    </th>
+                `).join('')}
                 <th></th>
             </tr>
         </thead>
@@ -58,7 +72,6 @@ document.querySelector('#app').innerHTML = `
 `;
 
 const rowsEl = document.getElementById('rows');
-const searchEl = document.getElementById('search');
 const dialogEl = document.getElementById('dialog');
 const dialogTitleEl = document.getElementById('dialog-title');
 const formEl = document.getElementById('form');
@@ -69,18 +82,39 @@ function escapeHtml(value) {
     return div.innerHTML;
 }
 
-function renderRows(entries) {
-    if (!entries || entries.length === 0) {
-        rowsEl.innerHTML = `<tr><td colspan="6" class="empty">No adjectives found.</td></tr>`;
+function updateSortIndicators() {
+    for (const c of COLUMNS) {
+        const el = document.getElementById(`sort-${c.key}`);
+        el.textContent = c.key === sortKey ? (sortDir === 'asc' ? '▲' : '▼') : '';
+    }
+}
+
+function visibleEntries() {
+    let entries = allEntries.filter(e =>
+        COLUMNS.every(c => {
+            const needle = filters[c.key].trim().toLowerCase();
+            if (!needle) return true;
+            return (e[c.key] ?? '').toLowerCase().includes(needle);
+        })
+    );
+    entries = entries.slice().sort((a, b) => {
+        const cmp = (a[sortKey] ?? '').localeCompare(b[sortKey] ?? '', undefined, { sensitivity: 'base' });
+        return sortDir === 'asc' ? cmp : -cmp;
+    });
+    return entries;
+}
+
+function render() {
+    updateSortIndicators();
+    const entries = visibleEntries();
+
+    if (entries.length === 0) {
+        rowsEl.innerHTML = `<tr><td colspan="${COLUMNS.length + 1}" class="empty">No adjectives found.</td></tr>`;
         return;
     }
     rowsEl.innerHTML = entries.map(e => `
         <tr data-id="${e.id}">
-            <td>${escapeHtml(e.word)}</td>
-            <td>${escapeHtml(e.adjective)}</td>
-            <td>${escapeHtml(e.derivedAdverb)}</td>
-            <td>${escapeHtml(e.translationLiteral)}</td>
-            <td>${escapeHtml(e.translationFigurative)}</td>
+            ${COLUMNS.map(c => `<td>${escapeHtml(e[c.key])}</td>`).join('')}
             <td class="actions">
                 <button class="secondary edit-btn">Edit</button>
                 <button class="danger delete-btn">Delete</button>
@@ -111,12 +145,11 @@ function renderRows(entries) {
 }
 
 async function refresh() {
-    const query = searchEl.value.trim();
     try {
-        const entries = query ? await SearchAdjectives(query) : await ListAdjectives();
-        renderRows(entries);
+        allEntries = await ListAdjectives();
+        render();
     } catch (err) {
-        rowsEl.innerHTML = `<tr><td colspan="6" class="empty">Failed to load: ${escapeHtml(String(err))}</td></tr>`;
+        rowsEl.innerHTML = `<tr><td colspan="${COLUMNS.length + 1}" class="empty">Failed to load: ${escapeHtml(String(err))}</td></tr>`;
     }
 }
 
@@ -132,6 +165,27 @@ function openDialog(entry) {
 
 document.getElementById('add-btn').addEventListener('click', () => openDialog(null));
 document.getElementById('cancel-btn').addEventListener('click', () => dialogEl.close());
+
+document.querySelectorAll('th.sortable').forEach(th => {
+    th.addEventListener('click', () => {
+        const key = th.dataset.key;
+        if (sortKey === key) {
+            sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+        } else {
+            sortKey = key;
+            sortDir = 'asc';
+        }
+        render();
+    });
+});
+
+document.querySelectorAll('.filter-input').forEach(input => {
+    input.addEventListener('click', (e) => e.stopPropagation());
+    input.addEventListener('input', () => {
+        filters[input.dataset.key] = input.value;
+        render();
+    });
+});
 
 formEl.addEventListener('submit', async (event) => {
     event.preventDefault();
@@ -154,12 +208,6 @@ formEl.addEventListener('submit', async (event) => {
     } catch (err) {
         alert(`Failed to save: ${err}`);
     }
-});
-
-let searchTimer;
-searchEl.addEventListener('input', () => {
-    clearTimeout(searchTimer);
-    searchTimer = setTimeout(refresh, 200);
 });
 
 refresh();

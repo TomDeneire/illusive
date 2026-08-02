@@ -41,7 +41,7 @@ document.querySelector('#app').innerHTML = `
                         <span class="sort-indicator" id="sort-${c.key}"></span>
                     </th>
                 `).join('')}
-                <th></th>
+                <th class="col-actions"></th>
             </tr>
             <tr class="filter-row">
                 ${COLUMNS.map(c => `
@@ -49,7 +49,7 @@ document.querySelector('#app').innerHTML = `
                         <input type="text" class="filter-input" data-key="${c.key}" placeholder="Filter..." autocomplete="off" />
                     </th>
                 `).join('')}
-                <th></th>
+                <th class="col-actions"></th>
             </tr>
         </thead>
         <tbody id="rows"></tbody>

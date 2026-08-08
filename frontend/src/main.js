@@ -22,7 +22,7 @@ const FIELDS = [
 const HIDDEN_FIELDS = ['derivedAdverb'];
 
 // Columns shown (and filterable/sortable) in the table.
-const COLUMNS = FIELDS.slice(0, 5).filter(f => !HIDDEN_FIELDS.includes(f.key));
+const COLUMNS = FIELDS.filter(f => !HIDDEN_FIELDS.includes(f.key));
 
 // Fields shown in the add/edit dialog.
 const FORM_FIELDS = FIELDS.filter(f => !HIDDEN_FIELDS.includes(f.key));

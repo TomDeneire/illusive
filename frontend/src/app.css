@@ -76,20 +76,22 @@ tr:hover td {
 }
 
 th[data-key="root"] {
-    width: 8%;
+    width: 6%;
 }
 
 th[data-key="adjective"] {
-    width: 12%;
+    width: 9%;
 }
 
 th[data-key="translationLiteral"],
-th[data-key="translationFigurative"] {
-    width: 31%;
+th[data-key="translationFigurative"],
+th[data-key="exampleLiteral"],
+th[data-key="exampleFigurative"] {
+    width: 19%;
 }
 
 th.col-actions {
-    width: 12%;
+    width: 9%;
 }
 
 th.sortable {

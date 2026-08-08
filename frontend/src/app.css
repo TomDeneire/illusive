@@ -83,11 +83,6 @@ th[data-key="adjective"] {
     width: 12%;
 }
 
-th[data-key="derivedAdverb"] {
-    width: 6%;
-    white-space: nowrap;
-}
-
 th[data-key="translationLiteral"],
 th[data-key="translationFigurative"] {
     width: 31%;

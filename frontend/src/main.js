@@ -18,10 +18,17 @@ const FIELDS = [
     { key: 'exampleFigurative', label: 'Example (figuratively)' },
 ];
 
+// Fields hidden from the UI but still preserved in the database on save.
+const HIDDEN_FIELDS = ['derivedAdverb'];
+
 // Columns shown (and filterable/sortable) in the table.
-const COLUMNS = FIELDS.slice(0, 5);
+const COLUMNS = FIELDS.slice(0, 5).filter(f => !HIDDEN_FIELDS.includes(f.key));
+
+// Fields shown in the add/edit dialog.
+const FORM_FIELDS = FIELDS.filter(f => !HIDDEN_FIELDS.includes(f.key));
 
 let editingId = null;
+let editingEntry = null;
 let allEntries = [];
 const filters = Object.fromEntries(COLUMNS.map(c => [c.key, '']));
 let sortKey = 'adjective';
@@ -57,7 +64,7 @@ document.querySelector('#app').innerHTML = `
     <dialog id="dialog">
         <h2 id="dialog-title">Add adjective</h2>
         <form id="form">
-            ${FIELDS.map(f => `
+            ${FORM_FIELDS.map(f => `
                 <div class="field">
                     <label for="f-${f.key}">${f.label}</label>
                     <input id="f-${f.key}" name="${f.key}" type="text" autocomplete="off" />
@@ -155,8 +162,9 @@ async function refresh() {
 
 function openDialog(entry) {
     editingId = entry ? entry.id : null;
+    editingEntry = entry ?? null;
     dialogTitleEl.textContent = entry ? `Edit "${entry.adjective}"` : 'Add adjective';
-    for (const f of FIELDS) {
+    for (const f of FORM_FIELDS) {
         formEl.elements[f.key].value = entry ? (entry[f.key] ?? '') : '';
     }
     dialogEl.showModal();
@@ -190,8 +198,11 @@ document.querySelectorAll('.filter-input').forEach(input => {
 formEl.addEventListener('submit', async (event) => {
     event.preventDefault();
     const entry = { id: editingId ?? 0 };
-    for (const f of FIELDS) {
+    for (const f of FORM_FIELDS) {
         entry[f.key] = formEl.elements[f.key].value.trim();
+    }
+    for (const key of HIDDEN_FIELDS) {
+        entry[key] = editingEntry ? (editingEntry[key] ?? '') : '';
     }
     if (!entry.adjective) {
         alert('Adjective is required.');

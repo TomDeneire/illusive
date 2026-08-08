@@ -37,6 +37,17 @@ go run ./cmd/migrate illusive.db
 This refuses to overwrite an existing database file, so remove or rename
 `illusive.db` first if you want to regenerate it from scratch.
 
+## UI preferences
+
+All columns are shown by default except "Root" and "Derived adverb". Table
+column widths can be resized by dragging the column edges, and columns can
+be shown or hidden via the "Columns" menu above the table. Both preferences
+are remembered between sessions, stored outside the sqlite database in a
+small JSON config file under the OS-standard config directory:
+
+- Linux: `~/.config/illusive/ui-config.json`
+- Windows: `%LOCALAPPDATA%\illusive\ui-config.json`
+
 ## Development
 
 Requires Go, Node/npm, and the [Wails CLI](https://wails.io/docs/gettingstarted/installation).

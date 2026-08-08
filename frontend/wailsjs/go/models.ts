@@ -1,3 +1,22 @@
+export namespace main {
+	
+	export class UIConfig {
+	    columnWidths: Record<string, number>;
+	    visibleColumns: Record<string, boolean>;
+	
+	    static createFrom(source: any = {}) {
+	        return new UIConfig(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.columnWidths = source["columnWidths"];
+	        this.visibleColumns = source["visibleColumns"];
+	    }
+	}
+
+}
+
 export namespace model {
 	
 	export class Adjective {

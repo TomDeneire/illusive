@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -74,6 +76,63 @@ func (a *App) UpdateAdjective(entry model.Adjective) error {
 // DeleteAdjective removes an adjective entry by id.
 func (a *App) DeleteAdjective(id int64) error {
 	return a.db.Delete(id)
+}
+
+// UIConfig holds the user's table display preferences.
+type UIConfig struct {
+	ColumnWidths   map[string]int  `json:"columnWidths"`
+	VisibleColumns map[string]bool `json:"visibleColumns"`
+}
+
+// uiConfigPath returns the path to the UI config file that stores the
+// user's table display preferences, under the OS-standard config directory
+// (%LOCALAPPDATA% on Windows, ~/.config on Linux).
+func uiConfigPath() (string, error) {
+	dir, err := os.UserConfigDir()
+	if err != nil {
+		return "", fmt.Errorf("locate config dir: %w", err)
+	}
+	return filepath.Join(dir, "illusive", "ui-config.json"), nil
+}
+
+// LoadUIConfig returns the saved UI preferences. Returns a zero-value
+// UIConfig if nothing has been saved yet.
+func (a *App) LoadUIConfig() (UIConfig, error) {
+	path, err := uiConfigPath()
+	if err != nil {
+		return UIConfig{}, err
+	}
+	data, err := os.ReadFile(path)
+	if errors.Is(err, os.ErrNotExist) {
+		return UIConfig{}, nil
+	}
+	if err != nil {
+		return UIConfig{}, fmt.Errorf("read ui config: %w", err)
+	}
+	var cfg UIConfig
+	if err := json.Unmarshal(data, &cfg); err != nil {
+		return UIConfig{}, fmt.Errorf("parse ui config: %w", err)
+	}
+	return cfg, nil
+}
+
+// SaveUIConfig persists the given UI preferences to disk.
+func (a *App) SaveUIConfig(cfg UIConfig) error {
+	path, err := uiConfigPath()
+	if err != nil {
+		return err
+	}
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		return fmt.Errorf("create config dir: %w", err)
+	}
+	data, err := json.MarshalIndent(cfg, "", "  ")
+	if err != nil {
+		return fmt.Errorf("encode ui config: %w", err)
+	}
+	if err := os.WriteFile(path, data, 0o644); err != nil {
+		return fmt.Errorf("write ui config: %w", err)
+	}
+	return nil
 }
 
 // shutdown closes the database connection when the app quits.

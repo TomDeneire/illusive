@@ -14,6 +14,14 @@ export function ListAdjectives() {
   return window['go']['main']['App']['ListAdjectives']();
 }
 
+export function LoadUIConfig() {
+  return window['go']['main']['App']['LoadUIConfig']();
+}
+
+export function SaveUIConfig(arg1) {
+  return window['go']['main']['App']['SaveUIConfig'](arg1);
+}
+
 export function SearchAdjectives(arg1) {
   return window['go']['main']['App']['SearchAdjectives'](arg1);
 }

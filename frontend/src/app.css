@@ -50,6 +50,34 @@ button.danger:hover {
     background: #dc2626;
 }
 
+.columns-menu {
+    position: relative;
+}
+
+.columns-panel {
+    position: absolute;
+    top: calc(100% + 0.35rem);
+    right: 0;
+    z-index: 10;
+    background: white;
+    border: 1px solid #cbd1d9;
+    border-radius: 6px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    padding: 0.5rem 0.75rem;
+    min-width: 200px;
+}
+
+.columns-panel-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.3rem 0;
+    font-size: 0.9rem;
+    color: #1a1f27;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
 .table-wrap {
     overflow-x: auto;
     max-width: 100%;

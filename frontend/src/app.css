@@ -50,9 +50,13 @@ button.danger:hover {
     background: #dc2626;
 }
 
+.table-wrap {
+    overflow-x: auto;
+    max-width: 100%;
+}
+
 table {
-    width: 100%;
-    table-layout: auto;
+    table-layout: fixed;
     border-collapse: collapse;
     text-align: left;
 }
@@ -65,6 +69,7 @@ th, td {
 }
 
 th {
+    position: relative;
     color: #6b7280;
     font-weight: 600;
     font-size: 0.85rem;
@@ -75,23 +80,18 @@ tr:hover td {
     background: #c8cdd6;
 }
 
-th[data-key="root"] {
-    width: 6%;
+.resizer {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 8px;
+    height: 100%;
+    cursor: col-resize;
+    user-select: none;
 }
 
-th[data-key="adjective"] {
-    width: 9%;
-}
-
-th[data-key="translationLiteral"],
-th[data-key="translationFigurative"],
-th[data-key="exampleLiteral"],
-th[data-key="exampleFigurative"] {
-    width: 19%;
-}
-
-th.col-actions {
-    width: 9%;
+.resizer:hover {
+    background: rgba(59, 130, 246, 0.4);
 }
 
 th.sortable {

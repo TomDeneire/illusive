@@ -34,21 +34,43 @@ const filters = Object.fromEntries(COLUMNS.map(c => [c.key, '']));
 let sortKey = 'adjective';
 let sortDir = 'asc';
 
+// Default column widths, as a percentage of the table width, before any
+// manual resizing. Not persisted — reset on next launch.
+const DEFAULT_WIDTH_PCT = {
+    root: 6,
+    adjective: 9,
+    translationLiteral: 19,
+    translationFigurative: 19,
+    exampleLiteral: 19,
+    exampleFigurative: 19,
+    actions: 9,
+};
+const COLUMN_KEYS = [...COLUMNS.map(c => c.key), 'actions'];
+const MIN_COLUMN_WIDTH = 60;
+const colWidths = {};
+
 document.querySelector('#app').innerHTML = `
     <h1>Illusive Adjectives</h1>
     <div class="toolbar">
         <button id="add-btn">+ Add adjective</button>
     </div>
+    <div class="table-wrap">
     <table>
+        <colgroup>
+            ${COLUMN_KEYS.map(key => `<col data-key="${key}" />`).join('')}
+        </colgroup>
         <thead>
             <tr>
                 ${COLUMNS.map(c => `
                     <th class="sortable" data-key="${c.key}">
                         <span class="th-label">${c.label}</span>
                         <span class="sort-indicator" id="sort-${c.key}"></span>
+                        <span class="resizer" data-key="${c.key}"></span>
                     </th>
                 `).join('')}
-                <th class="col-actions"></th>
+                <th class="col-actions">
+                    <span class="resizer" data-key="actions"></span>
+                </th>
             </tr>
             <tr class="filter-row">
                 ${COLUMNS.map(c => `
@@ -61,6 +83,7 @@ document.querySelector('#app').innerHTML = `
         </thead>
         <tbody id="rows"></tbody>
     </table>
+    </div>
     <dialog id="dialog">
         <h2 id="dialog-title">Add adjective</h2>
         <form id="form">
@@ -82,6 +105,58 @@ const rowsEl = document.getElementById('rows');
 const dialogEl = document.getElementById('dialog');
 const dialogTitleEl = document.getElementById('dialog-title');
 const formEl = document.getElementById('form');
+const tableEl = document.querySelector('.table-wrap table');
+const tableWrapEl = document.querySelector('.table-wrap');
+const colEls = Object.fromEntries(
+    COLUMN_KEYS.map(key => [key, tableEl.querySelector(`col[data-key="${key}"]`)])
+);
+
+function applyColumnWidths() {
+    let total = 0;
+    for (const key of COLUMN_KEYS) {
+        colEls[key].style.width = `${colWidths[key]}px`;
+        total += colWidths[key];
+    }
+    tableEl.style.width = `${total}px`;
+}
+
+function initColumnWidths() {
+    const wrapWidth = tableWrapEl.clientWidth;
+    for (const key of COLUMN_KEYS) {
+        colWidths[key] = Math.max(
+            MIN_COLUMN_WIDTH,
+            Math.round((DEFAULT_WIDTH_PCT[key] / 100) * wrapWidth)
+        );
+    }
+    applyColumnWidths();
+}
+
+function initResizers() {
+    tableEl.querySelectorAll('.resizer').forEach(handle => {
+        const key = handle.dataset.key;
+        handle.addEventListener('click', (e) => e.stopPropagation());
+        handle.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const startX = e.clientX;
+            const startWidth = colWidths[key];
+
+            function onMouseMove(moveEvent) {
+                colWidths[key] = Math.max(MIN_COLUMN_WIDTH, startWidth + (moveEvent.clientX - startX));
+                applyColumnWidths();
+            }
+            function onMouseUp() {
+                document.removeEventListener('mousemove', onMouseMove);
+                document.removeEventListener('mouseup', onMouseUp);
+            }
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+        });
+    });
+}
+
+initColumnWidths();
+initResizers();
 
 function escapeHtml(value) {
     const div = document.createElement('div');

@@ -49,7 +49,7 @@ function visibleFields() {
 }
 
 document.querySelector('#app').innerHTML = `
-    <h1>Illusive Adjectives</h1>
+    <h1>Elusive Adjectives</h1>
     <div class="toolbar">
         <div class="columns-menu">
             <button type="button" class="secondary" id="columns-btn">Columns ▾</button>
